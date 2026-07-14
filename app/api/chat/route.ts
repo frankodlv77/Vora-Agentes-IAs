@@ -15,7 +15,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { DEFAULT_CONFIG } from '@/lib/types';
 import { buildSystemPrompt } from '@/lib/promptBuilder';
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const { message, history, init } = await req.json();
 
     // Fetch current config
-    const { data: configData } = await supabase
+    const { data: configData } = await getSupabase()
       .from('demo_config')
       .select('*')
       .eq('id', 1)

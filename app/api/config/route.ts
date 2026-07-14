@@ -9,11 +9,11 @@
  * Cada save sobreescribe esa fila — no hay historial de configs.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { DEFAULT_CONFIG } from '@/lib/types';
 
 export async function GET() {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('demo_config')
     .select('*')
     .eq('id', 1)
@@ -29,7 +29,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('demo_config')
     .upsert(
       { ...body, id: 1, updated_at: new Date().toISOString() },
