@@ -20,6 +20,42 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { DemoConfig, DEFAULT_CONFIG } from '@/lib/types';
 
+// Presets por rubro — se cargan con "Usar ejemplo" en el admin
+const PRESETS: Record<string, { services: string; schedule: string }> = {
+  dental: {
+    services: 'Limpieza dental $15.000, Blanqueamiento LED $35.000, Ortodoncia (consulta sin cargo), Extracción simple $20.000, Radiografía $10.000',
+    schedule: 'Lunes a viernes 9 a 19hs, sábados 9 a 13hs',
+  },
+  estetica: {
+    services: 'Botox zona $80.000, Ácido hialurónico $120.000, Limpieza facial profunda $45.000, Hidratación vitamínica $55.000, Consulta inicial sin cargo',
+    schedule: 'Lunes a viernes 10 a 20hs, sábados 10 a 15hs',
+  },
+  gimnasio: {
+    services: 'Membresía mensual $25.000 (clases grupales incluidas), Personal trainer $15.000/sesión, Plan semestral con 10% descuento, Acceso libre 6 a 23hs',
+    schedule: 'Lunes a viernes 6 a 23hs, sábados y domingos 8 a 20hs',
+  },
+  psicologo: {
+    services: 'Sesión individual $18.000 (50 min), Terapia de pareja $25.000, Primera consulta $15.000, Modalidad online y presencial disponible',
+    schedule: 'Lunes a viernes 9 a 20hs, sábados 10 a 14hs',
+  },
+  restaurante: {
+    services: 'Menú del día $12.000 (entrada + plato + postre), Carta completa disponible, Delivery por PedidosYa y Rappi, Eventos y catering',
+    schedule: 'Martes a domingo 12 a 15hs y 20 a 24hs, lunes cerrado',
+  },
+  ropa: {
+    services: 'Remeras desde $15.000, Pantalones desde $35.000, Vestidos desde $45.000, Envíos a todo el país, Cambios y devoluciones 30 días',
+    schedule: 'Lunes a sábado 10 a 20hs, domingos en shopping 12 a 21hs',
+  },
+  peluqueria: {
+    services: 'Corte $15.000, Corte + lavado + secado $22.000, Coloración desde $50.000, Mechas desde $60.000, Keratina $80.000',
+    schedule: 'Martes a sábado 9 a 19hs, domingos 10 a 15hs, lunes cerrado',
+  },
+  veterinaria: {
+    services: 'Consulta general $12.000, Vacunación $18.000, Castración perros desde $45.000, Castración gatos desde $30.000, Baños y guardería disponibles',
+    schedule: 'Lunes a viernes 9 a 19hs, sábados 9 a 13hs, guardia domingos',
+  },
+};
+
 const INDUSTRIES = [
   { value: 'dental', label: 'Clínica dental' },
   { value: 'estetica', label: 'Clínica estética' },
@@ -275,6 +311,8 @@ export default function AdminPage() {
 
       if (data.success) {
         setSavedAt(new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
+        // Notifica a la pestaña /demo para que resetee el chat con la nueva config
+        localStorage.setItem('vora-config-version', Date.now().toString());
       } else {
         setSaveError('Error al guardar. Revisá la consola.');
       }
@@ -462,17 +500,30 @@ export default function AdminPage() {
           </Field>
 
           <Field label="Rubro">
-            <select
-              value={config.industry}
-              onChange={(e) => set('industry', e.target.value)}
-              style={selectStyle}
-            >
-              {INDUSTRIES.map((i) => (
-                <option key={i.value} value={i.value}>
-                  {i.label}
-                </option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <select
+                value={config.industry}
+                onChange={(e) => set('industry', e.target.value)}
+                style={{ ...selectStyle, flex: 1 }}
+              >
+                {INDUSTRIES.map((i) => (
+                  <option key={i.value} value={i.value}>{i.label}</option>
+                ))}
+              </select>
+              {PRESETS[config.industry] && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const preset = PRESETS[config.industry];
+                    setConfig(prev => ({ ...prev, services: preset.services, schedule: preset.schedule }));
+                    setSavedAt(null);
+                  }}
+                  style={{ padding: '9px 14px', background: '#F0EDE7', border: '1px solid #E5E2DC', borderRadius: 8, fontSize: 12, fontWeight: 500, color: '#2A2A2A', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+                >
+                  Usar ejemplo
+                </button>
+              )}
+            </div>
           </Field>
 
           {config.industry === 'otro' && (
